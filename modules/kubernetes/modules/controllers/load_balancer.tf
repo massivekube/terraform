@@ -3,7 +3,7 @@ resource "aws_lb" "controllers" {
   internal                   = false
   load_balancer_type         = "network"
   subnets                    = ["${var.subnets_private}"]
-  enable_deletion_protection = true
+  enable_deletion_protection = false
 
   tags {
     Environment = "${var.cluster_name}"

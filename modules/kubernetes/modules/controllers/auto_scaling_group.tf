@@ -9,20 +9,37 @@ resource "aws_autoscaling_group" "controllers" {
   target_group_arns = ["${aws_lb_target_group.controllers.id}"]
 
   tag {
-    key                 = "Environment"
-    value               = "${var.cluster_name}"
-    propagate_at_launch = true
+    key                 = "massive:DNS-SD:ports"
+    value               = "2380,2379"
+    propagate_at_launch = false
   }
 
   tag {
-    key                 = "Role"
-    value               = "controller"
-    propagate_at_launch = true
+    key                 = "massive:DNS-SD:names"
+    value               = "_etcd-server-ssl._tcp.development.local,_etcd-client-ssl._tcp.development.local"
+    propagate_at_launch = false
   }
 
   lifecycle {
     create_before_destroy = true
   }
+
+  depends_on = [
+    "aws_lambda_function.controllers_dns_sd",
+  ]
+}
+
+resource "aws_autoscaling_notification" "example_notifications" {
+  group_names = [
+    "${aws_autoscaling_group.controllers.name}",
+  ]
+
+  notifications = [
+    "autoscaling:EC2_INSTANCE_LAUNCH",
+    "autoscaling:EC2_INSTANCE_TERMINATE",
+  ]
+
+  topic_arn = "${aws_sns_topic.controllers_autoscaling.arn}"
 }
 
 resource "aws_sns_topic" "controllers_autoscaling" {
@@ -55,9 +72,38 @@ resource "aws_iam_role" "controllers_dns_sd" {
 EOF
 }
 
+resource "aws_iam_role_policy" "controllers_dns_sd" {
+  name = "logs"
+  role = "${aws_iam_role.controllers_dns_sd.arn}"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "logs:CreateLogGroup",
+            "Resource": "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": [
+                "${aws_lambda_function.controllers_dns_sd.arn}"
+            ]
+        }
+    ]
+}
+EOF
+}
+
 resource "aws_lambda_function" "controllers_dns_sd" {
-  s3_bucket     = "ma.ssive.co"
-  s3_key        = "lambdas/massive_autoscaling_dns_sd.zip"
+  s3_bucket = "ma.ssive.co"
+  s3_key    = "lambdas/massive_autoscaling_dns_sd.zip"
+
   function_name = "massive_autoscaling_DNS_SD"
   role          = "${aws_iam_role.controllers_dns_sd.arn}"
   handler       = "aws-autoscalinggroup-dns-sd"
