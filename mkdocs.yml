@@ -1,0 +1,15 @@
+site_name: Terraform
+site_description: Hashicorp Terraform modules to deploy the MassiveKube Kubernetes distribution
+site_author: MassiveKube Contributors
+
+theme:
+  name: 'material'
+
+pages:
+  - Home: index.md
+  - Modules:
+    - AWS VPC: modules/aws_vpc.md
+    - Kubernetes:
+      - General: modules/kubernetes.md
+      - Controllers: modules/kubernetes_controllers.md
+      - Nodes: modules/kubernetes_nodes.md
