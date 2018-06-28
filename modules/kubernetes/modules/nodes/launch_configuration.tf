@@ -1,6 +1,6 @@
 resource "aws_launch_configuration" "nodes" {
   name                 = "${var.cluster_name}-nodes"
-  image_id             = "${var.ami}"
+  image_id             = "${data.aws_ami.node.id}"
   instance_type        = "${var.instance_type}"
   key_name             = "${var.ssh_key_name}"
   iam_instance_profile = "${aws_iam_instance_profile.node.id}"

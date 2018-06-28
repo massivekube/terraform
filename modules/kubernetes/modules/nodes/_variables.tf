@@ -6,8 +6,6 @@ variable "count" {
 
 variable "cluster_name" {}
 
-variable "ami" {}
-
 variable "ssh_key_name" {}
 
 variable "instance_type" {

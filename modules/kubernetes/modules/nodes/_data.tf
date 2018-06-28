@@ -1,12 +1,12 @@
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
-data "aws_ami" "controller" {
+data "aws_ami" "node" {
   most_recent = true
 
   filter {
     name   = "name"
-    values = ["massivekube-controller"]
+    values = ["massivekube-node"]
   }
 
   filter {

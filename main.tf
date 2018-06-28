@@ -8,9 +8,10 @@ module "aws_vpc" {
 module "kubernetes" {
   source = "modules/kubernetes"
 
-  vpc_id       = "${module.aws_vpc.vpc_id}"
-  cluster_name = "development"
-  cluster_cidr = "10.1.0.0/16"
+  vpc_id                  = "${module.aws_vpc.vpc_id}"
+  cluster_name            = "development"
+  cluster_cidr            = "10.1.0.0/16"
+  availability_zone_count = 1
 
   subnets_private = "${module.aws_vpc.subnets_private}"
 }
