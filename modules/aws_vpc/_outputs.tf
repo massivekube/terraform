@@ -1,5 +1,9 @@
 output "vpc_id" {
-  value = "${aws_vpc.vpc.id}"
+  value = "${aws_vpc.kubernetes.id}"
+}
+
+output "zone_id" {
+  value = "${aws_route53_zone.kubernetes.id}"
 }
 
 output "subnets_private" {

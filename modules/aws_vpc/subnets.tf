@@ -1,6 +1,6 @@
 resource "aws_subnet" "public" {
   count      = "${var.availability_zone_count}"
-  vpc_id     = "${aws_vpc.vpc.id}"
+  vpc_id     = "${aws_vpc.kubernetes.id}"
   cidr_block = "${cidrsubnet(var.cluster_cidr, 8, count.index + 1)}"
 
   availability_zone = "${data.aws_availability_zones.available.names[count.index]}"
@@ -13,7 +13,7 @@ resource "aws_subnet" "public" {
 
 resource "aws_subnet" "private" {
   count             = "${var.availability_zone_count}"
-  vpc_id            = "${aws_vpc.vpc.id}"
+  vpc_id            = "${aws_vpc.kubernetes.id}"
   cidr_block        = "${cidrsubnet(var.cluster_cidr, 6, count.index + 1)}"
   availability_zone = "${data.aws_availability_zones.available.names[count.index]}"
 

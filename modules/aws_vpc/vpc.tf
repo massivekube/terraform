@@ -1,4 +1,4 @@
-resource "aws_vpc" "vpc" {
+resource "aws_vpc" "kubernetes" {
   cidr_block         = "${var.cluster_cidr}"
   enable_dns_support = true
   instance_tenancy   = "${var.instance_tenancy}"
@@ -20,12 +20,12 @@ resource "aws_vpc_dhcp_options" "dhcp_options" {
 }
 
 resource "aws_vpc_dhcp_options_association" "dhcp_options_association" {
-  vpc_id          = "${aws_vpc.vpc.id}"
+  vpc_id          = "${aws_vpc.kubernetes.id}"
   dhcp_options_id = "${aws_vpc_dhcp_options.dhcp_options.id}"
 }
 
 resource "aws_internet_gateway" "gateway" {
-  vpc_id = "${aws_vpc.vpc.id}"
+  vpc_id = "${aws_vpc.kubernetes.id}"
 
   tags {
     Environment = "${var.cluster_name}"
@@ -45,13 +45,13 @@ resource "aws_nat_gateway" "gateway" {
 }
 
 resource "aws_route" "gateway" {
-  route_table_id         = "${aws_vpc.vpc.default_route_table_id}"
+  route_table_id         = "${aws_vpc.kubernetes.default_route_table_id}"
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = "${aws_internet_gateway.gateway.id}"
 }
 
 resource "aws_route_table" "private" {
-  vpc_id = "${aws_vpc.vpc.id}"
+  vpc_id = "${aws_vpc.kubernetes.id}"
 
   route {
     cidr_block     = "0.0.0.0/0"
