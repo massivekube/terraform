@@ -36,7 +36,7 @@ resource "aws_lb_listener" "nodes_https" {
   protocol          = "TCP"
 
   default_action {
-    target_group_arn = "${aws_lb_target_group.nodes_https.arn}"
+    target_group_arn = "${aws_lb_target_group.nodes_https.id}"
     type             = "forward"
   }
 }
@@ -48,7 +48,7 @@ resource "aws_lb_listener" "nodes_http" {
   protocol          = "TCP"
 
   default_action {
-    target_group_arn = "${aws_lb_target_group.nodes_http.arn}"
+    target_group_arn = "${aws_lb_target_group.nodes_http.id}"
     type             = "forward"
   }
 }

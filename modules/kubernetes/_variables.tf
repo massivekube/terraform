@@ -3,6 +3,8 @@ variable "cluster_cidr" {}
 
 variable "vpc_id" {}
 
+variable "zone_id" {}
+
 variable "availability_zone_count" {
   default = 3
 }

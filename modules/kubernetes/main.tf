@@ -9,6 +9,7 @@ module "controllers" {
   ssh_key_name        = "${var.ssh_key_name}"
   subnets_private     = "${var.subnets_private}"
   vpc_id              = "${var.vpc_id}"
+  zone_id             = "${var.zone_id}"
 }
 
 module "nodes" {

@@ -1,7 +1,7 @@
 resource "aws_security_group" "bastion" {
   name        = "bastion"
   description = "Bastion node Security Group"
-  vpc_id      = "${aws_vpc.vpc.id}"
+  vpc_id      = "${aws_vpc.kubernetes.id}"
 
   tags {
     Name        = "bastion"

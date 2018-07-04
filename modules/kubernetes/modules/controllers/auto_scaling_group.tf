@@ -1,5 +1,5 @@
 resource "aws_autoscaling_group" "controllers" {
-  name                 = "${var.cluster_name}-controllers"
+  name_prefix          = "${var.cluster_name}_controllers_"
   launch_configuration = "${aws_launch_configuration.controllers.name}"
   min_size             = "${var.count}"
   max_size             = "${var.count}"
@@ -17,6 +17,12 @@ resource "aws_autoscaling_group" "controllers" {
   tag {
     key                 = "massive:DNS-SD:names"
     value               = "_etcd-server-ssl._tcp.development.local,_etcd-client-ssl._tcp.development.local"
+    propagate_at_launch = false
+  }
+
+  tag {
+    key                 = "massive:DNS-SD:Route53:zone"
+    value               = "${var.zone_id}"
     propagate_at_launch = false
   }
 
@@ -53,7 +59,7 @@ resource "aws_sns_topic_subscription" "controllers_autoscaling" {
 }
 
 resource "aws_iam_role" "controllers_dns_sd" {
-  name = "controllers_dns_sd"
+  name_prefix = "controllers_dns_sd_"
 
   assume_role_policy = <<EOF
 {
@@ -64,17 +70,16 @@ resource "aws_iam_role" "controllers_dns_sd" {
       "Principal": {
         "Service": "lambda.amazonaws.com"
       },
-      "Effect": "Allow",
-      "Sid": ""
+      "Effect": "Allow"
     }
   ]
 }
 EOF
 }
 
-resource "aws_iam_role_policy" "controllers_dns_sd" {
-  name = "logs"
-  role = "${aws_iam_role.controllers_dns_sd.arn}"
+resource "aws_iam_role_policy" "controllers_dns_sd_logging" {
+  name_prefix = "controllers_dns_sd_lambda_logging_"
+  role        = "${aws_iam_role.controllers_dns_sd.id}"
 
   policy = <<EOF
 {
@@ -82,8 +87,8 @@ resource "aws_iam_role_policy" "controllers_dns_sd" {
     "Statement": [
         {
             "Effect": "Allow",
-            "Action": "logs:CreateLogGroup",
-            "Resource": "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"
+            "Action": "logs:PutLogEvents",
+            "Resource": "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:*:*:*"
         },
         {
             "Effect": "Allow",
@@ -91,9 +96,48 @@ resource "aws_iam_role_policy" "controllers_dns_sd" {
                 "logs:CreateLogStream",
                 "logs:PutLogEvents"
             ],
-            "Resource": [
-                "${aws_lambda_function.controllers_dns_sd.arn}"
-            ]
+            "Resource": "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "logs:PutLogEvents",
+            "Resource": "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "logs:CreateLogGroup",
+            "Resource": "*"
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "controllers_dns_sd" {
+  name_prefix = "controllers_dns_sd_lambda_"
+  role        = "${aws_iam_role.controllers_dns_sd.id}"
+
+  //TODO: Restrict this to a single hosted zone
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeInstances",
+                "autoscaling:DescribeAutoScalingGroups"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "route53:GetHostedZone",
+                "route53:ChangeResourceRecordSets",
+                "route53:ListResourceRecordSets"
+            ],
+            "Resource": "arn:aws:route53:::hostedzone/*"
         }
     ]
 }
@@ -109,4 +153,12 @@ resource "aws_lambda_function" "controllers_dns_sd" {
   handler       = "aws-autoscalinggroup-dns-sd"
   runtime       = "go1.x"
   description   = "Ma.ssive Autoscaling DNS-SD"
+}
+
+resource "aws_lambda_permission" "with_sns" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.controllers_dns_sd.arn}"
+  principal     = "sns.amazonaws.com"
+  source_arn    = "${aws_sns_topic.controllers_autoscaling.arn}"
 }
