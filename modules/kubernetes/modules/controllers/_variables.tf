@@ -30,3 +30,5 @@ variable "subnets_private" {
 }
 
 variable "node_security_group" {}
+
+variable "asg_sns_topic" {}
