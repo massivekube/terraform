@@ -63,7 +63,7 @@ resource "aws_lambda_function" "a_record" {
   s3_bucket = "ma.ssive.co"
   s3_key    = "lambdas/massive_autoscaling_a_record.zip"
 
-  function_name = "asg_a_record"
+  function_name = "asg_${var.cluster_name}_a_record"
   role          = "${aws_iam_role.a_record.arn}"
   handler       = "aws-autoscalinggroup-a-record"
   runtime       = "go1.x"
