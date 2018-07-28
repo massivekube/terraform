@@ -1,8 +1,12 @@
 variable "vpc_id" {}
 
+variable "ami" {}
+
 variable "count" {
   default = 3
 }
+
+variable "aws_hostname_policy" {}
 
 variable "cluster_name" {}
 variable "zone_id" {}
@@ -30,5 +34,7 @@ variable "subnets_private" {
 }
 
 variable "node_security_group" {}
+
+variable "bastion_ssh_ingress_security_group" {}
 
 variable "asg_sns_topic" {}

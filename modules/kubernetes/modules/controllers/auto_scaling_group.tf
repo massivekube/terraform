@@ -15,6 +15,18 @@ resource "aws_autoscaling_group" "controllers" {
   }
 
   tag {
+    key                 = "massive:HostnamePrefix"
+    value               = "ctrl_"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "Role"
+    value               = "controller"
+    propagate_at_launch = true
+  }
+
+  tag {
     key                 = "massive:DNS-SD:names"
     value               = "_etcd-server-ssl._tcp.${var.cluster_name}.local,_etcd-client-ssl._tcp.${var.cluster_name}.local"
     propagate_at_launch = false

@@ -1,10 +1,11 @@
 resource "aws_autoscaling_group" "nodes" {
-  name                 = "${var.cluster_name}-nodes"
+  name_prefix          = "${var.cluster_name}_nodes_"
   launch_configuration = "${aws_launch_configuration.nodes.name}"
   min_size             = "${var.count}"
   max_size             = "${var.count}"
-  default_cooldown     = 30
+  default_cooldown     = 5
   vpc_zone_identifier  = ["${var.subnets_private}"]
+  termination_policies = ["OldestInstance", "ClosestToNextInstanceHour"]
 
   target_group_arns = [
     "${aws_lb_target_group.nodes_https.id}",

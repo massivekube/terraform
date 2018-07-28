@@ -1,5 +1,7 @@
 variable "vpc_id" {}
 
+variable "ami" {}
+
 variable "count" {
   default = 3
 }

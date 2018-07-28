@@ -23,3 +23,8 @@ resource "aws_iam_role" "controller" {
 }
 EOF
 }
+
+resource "aws_iam_role_policy_attachment" "controller_aws_hostname" {
+  role       = "${aws_iam_role.controller.name}"
+  policy_arn = "${var.aws_hostname_policy}"
+}

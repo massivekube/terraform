@@ -37,3 +37,5 @@ variable "subnets_public" {
 variable "ssh_key_name" {
   default = "massive-aws-us-east-2"
 }
+
+variable "bastion_ssh_ingress_security_group" {}
