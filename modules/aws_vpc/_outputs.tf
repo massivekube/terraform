@@ -10,6 +10,10 @@ output "subnets_private" {
   value = ["${aws_subnet.private.*.id}"]
 }
 
+output "subnets_public" {
+  value = ["${aws_subnet.public.*.id}"]
+}
+
 output "nat_public_ips" {
   value = ["${aws_eip.nats.*.public_ip}"]
 }
