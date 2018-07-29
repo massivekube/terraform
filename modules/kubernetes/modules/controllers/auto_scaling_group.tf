@@ -16,7 +16,7 @@ resource "aws_autoscaling_group" "controllers" {
 
   tag {
     key                 = "massive:HostnamePrefix"
-    value               = "ctrl_"
+    value               = "ctrl-"
     propagate_at_launch = true
   }
 
